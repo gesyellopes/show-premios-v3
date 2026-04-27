@@ -9,7 +9,9 @@ RUN npm install
 
 COPY . .
 
+# Debug: lista os arquivos do módulo storage
+RUN find /app/app/modules -type f | sort
+
 EXPOSE 3333
 
-##CMD ["node", "ace", "serve", "--watch"]
 CMD ["node", "ace", "webhook:worker"]
