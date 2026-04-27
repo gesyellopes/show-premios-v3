@@ -12,4 +12,4 @@ COPY . .
 EXPOSE 3333
 
 ##CMD ["node", "ace", "serve", "--watch"]
-CMD ["node", "build/ace", "webhook:worker"]
+CMD ["node", "ace", "webhook:worker"]
