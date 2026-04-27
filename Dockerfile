@@ -9,9 +9,6 @@ RUN npm install
 
 COPY . .
 
-# builda o projeto
-RUN node ace build
-
 EXPOSE 3333
 
-CMD ["node", "build/ace", "webhook:worker"]
+CMD ["node", "ace", "webhook:worker"]
