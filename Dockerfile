@@ -10,7 +10,6 @@ RUN npm install
 
 COPY . .
 
-# Ignora erros de TypeScript e força o build
 RUN node ace build --ignore-ts-errors
 
 # Estágio 2: Produção
@@ -27,7 +26,9 @@ COPY --from=builder /app/node_modules ./node_modules
 
 RUN npm prune --production
 
-RUN mkdir -p /app/logs && chown -R node:node /app/logs
+# Criar a pasta de logs onde o AdonisJS realmente procura (dentro de /app/build/logs)
+# e dar permissão ao usuário node
+RUN mkdir -p /app/build/logs && chown -R node:node /app/build
 
 USER node
 
