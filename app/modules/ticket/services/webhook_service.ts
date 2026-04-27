@@ -1,11 +1,11 @@
 // app/modules/ticket/services/receive_ticket_service.ts
 import env from '#start/env'
 import { inject } from '@adonisjs/core'
-import WhatsAppPayloadService from './whatsapp_payload_service.js'
-import TicketWhatsappService from './ticket_whatsapp_messages_service.js'
-import S3Storage from '../../../modules/storage/services/s3_service.js'
-import TicketReadService from './ticket_read_service.js'
-import { TICKET_CODES } from '../constants/index.js'
+import WhatsAppPayloadService from './whatsapp_payload_service.ts'
+import TicketWhatsappService from './ticket_whatsapp_messages_service.ts'
+import S3Storage from '../../../modules/storage/services/s3_service.ts'
+import TicketReadService from './ticket_read_service.ts'
+import { TICKET_CODES } from '../constants/index.ts'
 import { wapi } from '#start/w-api'
 import i18n from '@adonisjs/i18n/services/main'
 

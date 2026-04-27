@@ -2,7 +2,7 @@
 import { BaseCommand } from '@adonisjs/core/ace'
 import redis from '@adonisjs/redis/services/main'
 import app from '@adonisjs/core/services/app'
-import WebhookTicketService from '#modules/ticket/services/webhook_service.js'
+import WebhookTicketService from '../app/modules/ticket/services/webhook_service.ts'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
 
 export default class WebhookWorker extends BaseCommand {
