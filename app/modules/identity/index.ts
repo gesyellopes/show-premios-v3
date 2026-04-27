@@ -1,0 +1,6 @@
+export * from './types/index.js'
+export { default as IdentitiesController } from './controllers/identities_controller.js'
+export { default as IdentityService } from './services/identity_service.js'
+export { default as Identity } from './models/identity.js'
+export { default as IdentityPolicy } from './policies/identity_policy.js'
+export { default as IdentitiesProvider } from './providers/identities_provider.js'
