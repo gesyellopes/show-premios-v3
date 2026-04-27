@@ -4,7 +4,7 @@ import { ulid } from 'ulid'
 import { inject } from '@adonisjs/core'
 import TicketService from '../services/ticket_service.ts'
 import WebhookService from '../services/webhook_service.ts'
-import S3Storage from '#modules/storage/services/s3_service.js' // ✅ Importe seu novo serviço
+import S3Storage from '../../../modules/storage/services/s3_service.ts' // ✅ Importe seu novo serviço
 import { Readable } from 'node:stream' // ✅ Para converter JSON em Stream
 
 @inject()
