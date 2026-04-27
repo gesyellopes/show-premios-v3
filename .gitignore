@@ -6,7 +6,7 @@ build/
 dist/
 
 # Storage
-storage/
+/storage
 
 # Variáveis de Ambiente (Segurança Crítica)
 .env
