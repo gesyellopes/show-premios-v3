@@ -3,6 +3,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { ulid } from 'ulid'
 import { inject } from '@adonisjs/core'
 import TicketService from '../services/ticket_service.ts'
+import TicketWhatsappService from '../services/ticket_whatsapp_messages_service.ts'
 import WebhookService from '../services/webhook_service.ts'
 import S3Storage from '../../../modules/storage/services/s3_service.ts' // ✅ Importe seu novo serviço
 import { Readable } from 'node:stream' // ✅ Para converter JSON em Stream
@@ -12,7 +13,8 @@ export default class TicketsController {
   constructor(
     protected ticketService: TicketService,
     protected webhookService: WebhookService,
-    protected s3Storage: S3Storage
+    protected s3Storage: S3Storage,
+    protected ticketWhatsappService: TicketWhatsappService
   ) {}
 
   async webhook({ request, response }: HttpContext) {
@@ -90,5 +92,12 @@ export default class TicketsController {
 
     const messages = await redis.lrange('webhook_queue', 0, -1)
     return response.ok({ total: messages.length, messages })
+  }
+
+  /** Verifica se uma cartela já está validada ou não */
+  async verifyTicket({ request, response }: HttpContext) {
+    const ticketNumber = request.params().ticketNumber
+    const isValidated = await this.ticketWhatsappService.isTicketValidated(ticketNumber)
+    return response.ok({ success: true, valid: isValidated })
   }
 }

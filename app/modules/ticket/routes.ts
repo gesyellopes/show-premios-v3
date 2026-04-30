@@ -12,5 +12,8 @@ router
 
     router.post('/bulk', [TicketsController, 'bulkCreate'])
     router.post('/queue', [TicketsController, 'manageQueue'])
+
+    //Validação de ticket
+    router.get('/validate/:ticketNumber', [TicketsController, 'verifyTicket'])
   })
   .prefix('/api/tickets')
