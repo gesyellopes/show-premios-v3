@@ -218,6 +218,7 @@ export default class WebhookTicketService {
     }
 
     const messageKey = this.resolveFailureMessageKey(reason)
+    console.log(this.i18n.t(messageKey))
     await wapi.sendText({
       phone: payload.senderNumber!,
       message: this.i18n.t(messageKey),
