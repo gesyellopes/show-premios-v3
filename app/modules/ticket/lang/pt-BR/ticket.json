@@ -1,9 +1,9 @@
 {
-  "ticket_success": "O canhoto número *{ticketCode}* foi lido com sucesso e já está concorrendo!",
+  "ticket_success": "✅ O canhoto número *{ticketCode}* foi lido com sucesso e já está concorrendo! ✅",
   "ticket_max_attempts_error": "Não conseguimos ler o QR Code após várias tentativas. Por favor, envie uma foto mais nítida.",
-  "ticket_no_qrcode": "Não conseguimos encontrar um QR Code nesta imagem. Tente enviar uma foto mais nítida e centralizada do canhoto.",
-  "ticket_multiple_qrcodes": "Detectamos mais de um QR Code na imagem. Por favor, envie uma foto de apenas um canhoto por vez.",
-  "ticket_empty_qrcode": "O QR Code lido parece estar vazio ou inválido. Por favor, verifique o canhoto e tente novamente.",
-  "ticket_already_validated": "O canhoto número *{ticketCode}* já foi validado anteriormente.",
+  "ticket_no_qrcode": "❌ Não conseguimos encontrar um QR Code nesta imagem. Tente enviar uma foto mais nítida e centralizada do canhoto. ❌",
+  "ticket_multiple_qrcodes": "🛑 Detectamos mais de um QR Code na imagem. Por favor, envie uma foto de apenas um canhoto por vez. 🛑",
+  "ticket_empty_qrcode": "⛔️ O QR Code lido parece estar vazio ou inválido. Por favor, verifique o canhoto e tente novamente. ⛔️",
+  "ticket_already_validated": "⚠️ O canhoto número  *{ticketCode}* já foi validado anteriormente. ⚠️",
   "ticket_file_delete_error": "Erro ao remover o arquivo do ticket."
 }
