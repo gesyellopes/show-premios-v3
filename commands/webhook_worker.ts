@@ -55,7 +55,7 @@ export default class WebhookWorker extends BaseCommand {
       const receiveService = await app.container.make(WebhookTicketService)
       const result = await receiveService.execute(messageId)
 
-      // console.log(result)
+      console.log(result)
 
       if (result && result.retry === true) {
         this.logger.warning(
