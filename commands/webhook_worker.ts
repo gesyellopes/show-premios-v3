@@ -32,7 +32,7 @@ export default class WebhookWorker extends BaseCommand {
         const shouldRetry = await this.processMessage(messageId)
 
         if (shouldRetry) {
-          //this.logger.info(`🔄 Agendando reprocessamento para: ${messageId}`)
+          this.logger.info(`🔄 Agendando reprocessamento para: ${messageId}`)
           // Devolvemos ao final da fila para processar outros antes de tentar este novamente
           await redis.rpush('webhook_queue', messageId)
           // Pequeno delay para não travar em erro persistente
@@ -50,7 +50,7 @@ export default class WebhookWorker extends BaseCommand {
    */
   private async processMessage(messageId: string): Promise<boolean> {
     try {
-      //this.logger.info(`⚙️  Iniciando processamento: ${messageId}`)
+      this.logger.info(`⚙️  Iniciando processamento: ${messageId}`)
 
       const receiveService = await app.container.make(WebhookTicketService)
       const result = await receiveService.execute(messageId)
@@ -58,10 +58,9 @@ export default class WebhookWorker extends BaseCommand {
       // console.log(result)
 
       if (result && result.retry === true) {
-        /*
         this.logger.warning(
           `⚠️  Falha temporária em ${messageId}: ${result.error || 'Retry solicitado'}`
-        )*/
+        )
         return true
       }
 
@@ -69,7 +68,7 @@ export default class WebhookWorker extends BaseCommand {
       return false
     } catch (error) {
       //const msg = error instanceof Error ? error.message : 'Erro desconhecido'
-      //this.logger.error(`❌ Erro no ao processar: ${msg}`)
+      this.logger.error(`❌ Erro no ao processar: ${msg}`)
       return true // Erros de exceção sempre tentam novamente
     }
   }
