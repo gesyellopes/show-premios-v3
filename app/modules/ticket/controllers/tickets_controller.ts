@@ -39,10 +39,10 @@ export default class TicketsController {
       // 4. Empilha no Redis
       await redis.lpush('webhook_queue', messageId)
 
-      // console.log({
-      //   id: messageId,
-      //   info: 'Payload em S3, Banco e Fila.',
-      // })
+      console.log({
+         id: messageId,
+         info: 'Payload em S3, Banco e Fila.',
+      })
 
       return response.created()
     } catch (error: any) {
