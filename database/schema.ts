@@ -7,6 +7,38 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class DistributorCategorySchema extends BaseModel {
+  static $columns = ['createdAt', 'distributorId', 'eventId', 'id', 'name', 'updatedAt'] as const
+  $columns = DistributorCategorySchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare distributorId: number
+  @column()
+  declare eventId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class DistributorSchema extends BaseModel {
+  static $columns = ['createdAt', 'eventId', 'id', 'name', 'updatedAt'] as const
+  $columns = DistributorSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare eventId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class NotificationMessageLogSchema extends BaseModel {
   static $columns = ['context', 'createdAt', 'id', 'message', 'notificationMessageId', 'status', 'tenantId', 'type'] as const
   $columns = NotificationMessageLogSchema.$columns
@@ -322,10 +354,10 @@ export class TenantSchema extends BaseModel {
 }
 
 export class TicketWhatsappMessageSchema extends BaseModel {
-  static $columns = ['attempts', 'createdAt', 'deletedAt', 'filename', 'id', 'senderName', 'senderNumber', 'sentAt', 'status', 'ticketNumber', 'updatedAt', 'validationCode', 'whatsappMessageId'] as const
+  static $columns = ['attempts', 'createdAt', 'deletedAt', 'filename', 'id', 'messageId', 'senderName', 'senderNumber', 'sentAt', 'status', 'ticketNumber', 'updatedAt', 'whatsappMessageId'] as const
   $columns = TicketWhatsappMessageSchema.$columns
   @column()
-  declare attempts: number | null
+  declare attempts: number
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column.dateTime()
@@ -334,6 +366,8 @@ export class TicketWhatsappMessageSchema extends BaseModel {
   declare filename: string | null
   @column({ isPrimary: true })
   declare id: number
+  @column()
+  declare messageId: string | null
   @column()
   declare senderName: string | null
   @column()
@@ -347,22 +381,26 @@ export class TicketWhatsappMessageSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
-  declare validationCode: string
-  @column()
   declare whatsappMessageId: string
 }
 
 export class TicketSchema extends BaseModel {
-  static $columns = ['createdAt', 'deletedAt', 'eventId', 'id', 'status', 'ticketNumber', 'updatedAt', 'uuid', 'validatedAt', 'validationCode'] as const
+  static $columns = ['createdAt', 'deletedAt', 'distributorCategoryId', 'distributorId', 'eventId', 'id', 'messageId', 'status', 'ticketNumber', 'updatedAt', 'uuid', 'validatedAt', 'vendorId'] as const
   $columns = TicketSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column.dateTime()
   declare deletedAt: DateTime | null
   @column()
+  declare distributorCategoryId: number | null
+  @column()
+  declare distributorId: number | null
+  @column()
   declare eventId: number
   @column({ isPrimary: true })
   declare id: number
+  @column()
+  declare messageId: string | null
   @column()
   declare status: string
   @column()
@@ -374,7 +412,7 @@ export class TicketSchema extends BaseModel {
   @column.dateTime()
   declare validatedAt: DateTime | null
   @column()
-  declare validationCode: string | null
+  declare vendorId: number | null
 }
 
 export class UserMetaSchema extends BaseModel {
@@ -431,4 +469,23 @@ export class UserSchema extends BaseModel {
   declare username: string | null
   @column()
   declare uuid: string
+}
+
+export class VendorSchema extends BaseModel {
+  static $columns = ['createdAt', 'distributorCategoryId', 'distributorId', 'eventId', 'id', 'name', 'updatedAt'] as const
+  $columns = VendorSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare distributorCategoryId: number | null
+  @column()
+  declare distributorId: number | null
+  @column()
+  declare eventId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }

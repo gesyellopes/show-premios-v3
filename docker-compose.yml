@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3333:3333" # Mapeia a porta 3333 do host para a porta 3333 do contêiner
+    volumes:
+      - .:/app # Monta o diretório atual do projeto dentro do contêiner
+      - /app/node_modules # Garante que os node_modules instalados no contêiner não sejam sobrescritos pelo host
+    command: ["node", "ace", "serve", "--watch"] # Comando para iniciar o serviço da API
+    environment:
+      # Variáveis de ambiente para o serviço da API.
+      # Você pode configurar estas variáveis diretamente no Collify.
+      # Exemplo:
+      # NODE_ENV: development
+      # APP_URL: http://localhost:3333
+      # QRCODE_API_URL: http://qrcode-api:8080 # Se houver outro serviço de QR Code
+    restart: unless-stopped # Reinicia o contêiner automaticamente, a menos que seja parado manualmente
+
+  webhook:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app # Monta o diretório atual do projeto dentro do contêiner
+      - /app/node_modules # Garante que os node_modules instalados no contêiner não sejam sobrescritos pelo host
+    command: ["node", "ace", "webhook:worker"] # Comando para iniciar o serviço do webhook
+    environment:
+      # Variáveis de ambiente para o serviço do webhook.
+      # Exemplo:
+      # NODE_ENV: production
+      # MAX_ATTEMPTS: 5
+    restart: unless-stopped # Reinicia o contêiner automaticamente, a menos que seja parado manualmente

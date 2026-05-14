@@ -5,8 +5,10 @@ import { inject } from '@adonisjs/core'
 import TicketService from '../services/ticket_service.ts'
 import TicketWhatsappService from '../services/ticket_whatsapp_messages_service.ts'
 import WebhookService from '../services/webhook_service.ts'
-import S3Storage from '../../../modules/storage/services/s3_service.ts' // ✅ Importe seu novo serviço
-import { Readable } from 'node:stream' // ✅ Para converter JSON em Stream
+import S3Storage from '../../../modules/storage/services/s3_service.ts'
+import { Readable } from 'node:stream'
+import { listTicketsValidator } from '../validators/list_tickets_validator.ts'
+import { bulkUpdateTicketsValidator } from '../validators/bulk_update_tickets_validator.ts'
 
 @inject()
 export default class TicketsController {
@@ -20,6 +22,8 @@ export default class TicketsController {
   async webhook({ request, response }: HttpContext) {
     const messageId = ulid()
     const payload = request.all()
+
+    //console.log('chegou')
 
     try {
       // 1. Converter o JSON em um Stream para o S3 (Zero-Footprint)
@@ -40,8 +44,8 @@ export default class TicketsController {
       await redis.lpush('webhook_queue', messageId)
 
       console.log({
-         id: messageId,
-         info: 'Payload em S3, Banco e Fila.',
+        id: messageId,
+        info: 'Payload em S3, Banco e Fila.',
       })
 
       return response.created()
@@ -99,5 +103,25 @@ export default class TicketsController {
     const ticketNumber = request.params().ticketNumber
     const isValidated = await this.ticketWhatsappService.isTicketValidated(ticketNumber)
     return response.ok({ success: true, valid: isValidated })
+  }
+
+  /**
+   * Lista tickets com filtros dinâmicos
+   */
+  async index({ request, response }: HttpContext) {
+    const filters = await request.validateUsing(listTicketsValidator)
+    const page = filters.page || 1
+    const limit = filters.limit || 15
+    const tickets = await this.ticketService.listByFilters({ ...filters, page, limit })
+    return response.ok(tickets)
+  }
+
+  /**
+   * Atualiza tickets em lote para um evento
+   */
+  async bulkUpdate({ request, response }: HttpContext) {
+    const data = await request.validateUsing(bulkUpdateTicketsValidator)
+    const result = await this.ticketService.bulkUpdate(data.event_id, data)
+    return response.ok(result)
   }
 }

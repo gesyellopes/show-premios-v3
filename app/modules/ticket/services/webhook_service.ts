@@ -5,8 +5,8 @@ import WhatsAppPayloadService from './whatsapp_payload_service.ts'
 import TicketWhatsappService from './ticket_whatsapp_messages_service.ts'
 import S3Storage from '../../../modules/storage/services/s3_service.ts'
 import TicketReadService from './ticket_read_service.ts'
+import EvolutionApiService from './evolution_api_service.ts'
 import { TICKET_CODES } from '../constants/index.ts'
-import { wapi } from '#start/w-api'
 import i18n from '@adonisjs/i18n/services/main'
 
 interface TicketPayload {
@@ -16,6 +16,7 @@ interface TicketPayload {
   sentAt?: string | number
   fileName: string
   messageId: string
+  mediaUrl?: string
 }
 
 type ServiceResult = {
@@ -35,7 +36,8 @@ export default class WebhookTicketService {
     protected whatsAppPayloadService: WhatsAppPayloadService,
     protected ticketWhatsappService: TicketWhatsappService,
     protected s3Storage: S3Storage,
-    protected ticketReadService: TicketReadService
+    protected ticketReadService: TicketReadService,
+    protected evolutionApiService: EvolutionApiService
   ) {}
 
   /**
@@ -83,20 +85,18 @@ export default class WebhookTicketService {
       return { retry: false, error: 'PAYLOAD_NOT_FOUND' }
     }
 
-    const payload = JSON.parse(content)
+    const rawPayload = JSON.parse(content)
 
-    if (!this.whatsAppPayloadService.isImage(payload)) {
+    if (!rawPayload.data.message.imageMessage) {
       return { retry: false, error: 'IS_NOT_IMAGE' }
     }
 
-    const mediaLink = await this.whatsAppPayloadService.getMediaLink(payload)
-    if (!mediaLink) {
-      return { retry: true, error: 'ERROR_DOWNLOAD_MEDIA' }
-    }
+    const payload = this.mapEvolutionPayload(rawPayload)
 
-    const uploadPayload = await this.s3Storage.uploadFromUrl(mediaLink, {
+    //Envio a mídia para o S3
+    const uploadPayload = await this.s3Storage.uploadFromUrl(payload.mediaUrl!, {
       path: 'tickets',
-      fileName: messageId,
+      fileName: payload.messageId,
     })
 
     if (!uploadPayload) {
@@ -104,9 +104,8 @@ export default class WebhookTicketService {
     }
 
     const ticketPayload: TicketPayload = {
-      ...this.whatsAppPayloadService.getBasicInfo(payload),
+      ...payload,
       fileName: uploadPayload.storageFileName,
-      messageId,
     }
 
     return await this.readTicket(ticketPayload, { alreadyPersisted: false })
@@ -114,6 +113,13 @@ export default class WebhookTicketService {
 
   /**
    * Persiste a mensagem (se necessário), lê o QR Code e valida o ticket.
+   * messageId: payload.messageId,
+          senderNumber: payload.senderNumber!,
+          whatsappMessageId: payload.whatsappMessageId!,
+          senderName: payload.senderName,
+          filename: payload.fileName,
+          sentAt: payload.sentAt,
+          attempts: 0,
    */
   private async readTicket(
     payload: TicketPayload,
@@ -174,10 +180,16 @@ export default class WebhookTicketService {
     const ticketCode = ticketId.slice(2)
 
     await this.ticketWhatsappService.updateStatus(payload.messageId, 'VALIDATED', ticketId)
-    await wapi.sendText({
-      phone: payload.senderNumber!,
-      message: this.i18n.t('ticket.ticket_already_validated', { ticketCode }),
-      messageId: payload.whatsappMessageId,
+    await this.evolutionApiService.sendText({
+      number: payload.senderNumber!,
+      text: this.i18n.t('ticket.ticket_already_validated', { ticketCode }),
+      quoted: {
+        key: {
+          id: payload.messageId,
+          remoteJid: `${payload.senderNumber}@s.whatsapp.net`,
+          fromMe: false,
+        },
+      },
     })
 
     return { retry: false, error: TICKET_CODES.ALREADY_VALIDATED }
@@ -194,10 +206,16 @@ export default class WebhookTicketService {
       ticketNumber: qrCode.ticket_id,
     })
 
-    await wapi.sendText({
-      phone: payload.senderNumber!,
-      message: this.i18n.t('ticket.ticket_success', { ticketCode }),
-      messageId: payload.whatsappMessageId,
+    await this.evolutionApiService.sendText({
+      number: payload.senderNumber!,
+      text: this.i18n.t('ticket.ticket_success', { ticketCode }),
+      quoted: {
+        key: {
+          id: payload.messageId,
+          remoteJid: `${payload.senderNumber}@s.whatsapp.net`,
+          fromMe: false,
+        },
+      },
     })
 
     return { retry: false, success: true, ...validate }
@@ -218,11 +236,16 @@ export default class WebhookTicketService {
     }
 
     const messageKey = this.resolveFailureMessageKey(reason)
-    //console.log(this.i18n.t(messageKey))
-    await wapi.sendText({
-      phone: payload.senderNumber!,
-      message: this.i18n.t(messageKey),
-      messageId: payload.whatsappMessageId,
+    await this.evolutionApiService.sendText({
+      number: payload.senderNumber!,
+      text: this.i18n.t(messageKey),
+      quoted: {
+        key: {
+          id: payload.messageId,
+          remoteJid: `${payload.senderNumber}@s.whatsapp.net`,
+          fromMe: false,
+        },
+      },
     })
 
     return { retry: false, error: TICKET_CODES.MAX_ATTEMPTS, reason }
@@ -255,5 +278,38 @@ export default class WebhookTicketService {
     }
 
     return result
+  }
+
+  /**
+   * Extrai o ID do JID (remover domínio do WhatsApp).
+   */
+  private extrairId(jid: string): string {
+    return jid.split('@')[0]
+  }
+
+  /**
+   * Mapeia o payload do Evolution API para o formato interno TicketPayload.
+   */
+  private mapEvolutionPayload(evolutionPayload: any): TicketPayload {
+    const data = evolutionPayload.data
+    const messageId = data.key.id
+    const senderName = data.pushName
+    const sentAt = data.messageTimestamp
+    let mediaUrl = data.message.mediaUrl
+
+    // Remove query params da URL para evitar problemas com assinatura expirada
+    if (mediaUrl) {
+      mediaUrl = mediaUrl.split('?')[0]
+    }
+
+    return {
+      messageId,
+      senderNumber: this.extrairId(data.key.remoteJid),
+      whatsappMessageId: messageId,
+      senderName,
+      fileName: messageId,
+      sentAt,
+      mediaUrl,
+    }
   }
 }

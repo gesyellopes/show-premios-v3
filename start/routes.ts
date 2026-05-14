@@ -10,6 +10,10 @@
 
 //import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
+import '#modules/vendor/routes.js'
+
+import '#modules/distributor/routes.js'
+
 
 import '#modules/ticket/routes.js'
 

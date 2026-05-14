@@ -36,6 +36,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   WAPI_TOKEN: Env.schema.string.optional(),
   WAPI_INSTANCE_ID: Env.schema.string.optional(),
 
+  //EVOLUTION API CREDENTIALS
+  EVOLUTION_API_URL: Env.schema.string(),
+  EVOLUTION_INSTANCE: Env.schema.string(),
+  EVOLUTION_API_KEY: Env.schema.string(),
+
   /*
   |----------------------------------------------------------
   | Variables for configuring the drive package

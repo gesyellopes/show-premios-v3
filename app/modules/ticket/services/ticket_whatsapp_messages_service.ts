@@ -1,6 +1,6 @@
 // app/services/ticket_whatsapp_service.ts
-import TicketWhatsappMessage from '#modules/ticket/models/ticket_whatsapp_messages.js'
-import Ticket from '#modules/ticket/models/ticket.js'
+import TicketWhatsappMessage from '#modules/ticket/models/ticket_whatsapp_messages.ts'
+import Ticket from '#modules/ticket/models/ticket.ts'
 import { DateTime } from 'luxon'
 
 export default class TicketWhatsappService {

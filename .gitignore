@@ -26,6 +26,9 @@ tmp/
 *.tsbuildinfo
 .DS_Store
 
+# Modelos de Payload (Referência)
+modelo-evolution*.json
+
 # IDEs e Editores
 .vscode/
 .idea/
