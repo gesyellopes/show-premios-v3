@@ -12,12 +12,7 @@ services:
       - /app/node_modules # Garante que os node_modules instalados no contêiner não sejam sobrescritos pelo host
     command: ["node", "ace", "serve", "--watch"] # Comando para iniciar o serviço da API
     environment:
-      # Variáveis de ambiente para o serviço da API.
-      # Você pode configurar estas variáveis diretamente no Collify.
-      # Exemplo:
-      # NODE_ENV: development
-      # APP_URL: http://localhost:3333
-      # QRCODE_API_URL: http://qrcode-api:8080 # Se houver outro serviço de QR Code
+      - NODE_ENV=development
     restart: unless-stopped # Reinicia o contêiner automaticamente, a menos que seja parado manualmente
 
   webhook:
@@ -29,8 +24,5 @@ services:
       - /app/node_modules # Garante que os node_modules instalados no contêiner não sejam sobrescritos pelo host
     command: ["node", "ace", "webhook:worker"] # Comando para iniciar o serviço do webhook
     environment:
-      # Variáveis de ambiente para o serviço do webhook.
-      # Exemplo:
-      # NODE_ENV: production
-      # MAX_ATTEMPTS: 5
+      - NODE_ENV=development
     restart: unless-stopped # Reinicia o contêiner automaticamente, a menos que seja parado manualmente
