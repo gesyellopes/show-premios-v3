@@ -16,5 +16,8 @@ router
 
     //Validação de ticket
     router.get('/validate/:ticketNumber', [TicketsController, 'verifyTicket'])
+
+    //Invalidar ticket
+    router.delete('/invalidate/:ticketNumber', [TicketsController, 'invalidateTicket'])
   })
   .prefix('/api/tickets')

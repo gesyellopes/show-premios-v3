@@ -218,6 +218,8 @@ export default class WebhookTicketService {
       },
     })
 
+    this.triggerValidationWebhook(qrCode.ticket_id, payload.fileName)
+
     return { retry: false, success: true, ...validate }
   }
 
@@ -311,5 +313,28 @@ export default class WebhookTicketService {
       sentAt,
       mediaUrl,
     }
+  }
+
+  /**
+   * Dispara webhook para notificar validação do ticket sem bloquear a execução
+   */
+  private triggerValidationWebhook(ticketId: string, fileName: string): void {
+    const ticketNumber = ticketId.slice(2)
+    const now = new Date()
+    const validatedOn = now.toISOString().slice(0, 19).replace('T', ' ')
+
+    const body = {
+      ticket_number: ticketNumber,
+      ticker_mirror: fileName,
+      validated_on: validatedOn,
+    }
+
+    fetch('https://newapi.showdepremios.cloud/api/v1/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).catch((error) => {
+      console.error('[WebhookTicketService] Erro ao disparar webhook de validação:', error.message)
+    })
   }
 }

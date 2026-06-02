@@ -124,4 +124,33 @@ export default class TicketsController {
     const result = await this.ticketService.bulkUpdate(data.event_id, data)
     return response.ok(result)
   }
+
+  /**
+   * Invalida um ticket: deleta mensagens WhatsApp e reseta o status
+   */
+  async invalidateTicket({ request, response }: HttpContext) {
+    const ticketNumber = request.params().ticketNumber
+
+    if (!ticketNumber || !/^\d{6}$/.test(ticketNumber)) {
+      return response.badRequest({
+        message: 'Número do ticket inválido. Deve conter exatamente 6 dígitos.',
+      })
+    }
+
+    const formattedTicketNumber = `AC${ticketNumber}`
+
+    try {
+      await this.ticketWhatsappService.deleteByTicketNumber(formattedTicketNumber)
+      const ticket = await this.ticketService.invalidateTicket(formattedTicketNumber)
+
+      return response.ok({
+        message: 'Ticket invalidado com sucesso',
+        ticket,
+      })
+    } catch (error: any) {
+      return response.notFound({
+        message: error.message,
+      })
+    }
+  }
 }

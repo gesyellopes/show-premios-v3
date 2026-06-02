@@ -134,4 +134,19 @@ export default class TicketService {
 
     return { count: data.volume }
   }
+
+  async invalidateTicket(ticketNumber: string) {
+    const ticket = await Ticket.query().where('ticket_number', ticketNumber).first()
+
+    if (!ticket) {
+      throw new Error(`Ticket ${ticketNumber} não encontrado`)
+    }
+
+    ticket.status = 'WAITING_SALE'
+    ticket.messageId = null
+    ticket.validatedAt = null
+
+    await ticket.save()
+    return ticket
+  }
 }

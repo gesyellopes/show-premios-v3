@@ -137,4 +137,14 @@ export default class TicketWhatsappService {
     await message.save()
     return message
   }
+
+  /**
+   * Deleta todas as mensagens WhatsApp associadas a um ticket
+   */
+  async deleteByTicketNumber(ticketNumber: string) {
+    const result = await TicketWhatsappMessage.query()
+      .where('ticketNumber', ticketNumber)
+      .delete()
+    return result
+  }
 }
