@@ -72,6 +72,52 @@ export default class WebhookTicketService {
   }
 
   /**
+   * Processa um payload JSON já carregado (útil para validação manual de arquivos locais)
+   */
+  async executeFromPayload(messageId: string, payloadContent: string): Promise<ServiceResult> {
+    try {
+      const messageBD = await this.ticketWhatsappService.findByCode(messageId)
+
+      if (
+        (messageBD && messageBD.status === 'VALIDATED') ||
+        (messageBD && messageBD.attempts >= env.get('MAX_ATTEMPTS'))
+      ) {
+        return { retry: false, error: TICKET_CODES.ALREADY_VALIDATED }
+      }
+
+      const payload = JSON.parse(payloadContent)
+
+      if (!this.whatsAppPayloadService.isImage(payload)) {
+        return { retry: false, error: 'IS_NOT_IMAGE' }
+      }
+
+      const mediaLink = await this.whatsAppPayloadService.getMediaLink(payload)
+      if (!mediaLink) {
+        return { retry: true, error: 'ERROR_DOWNLOAD_MEDIA' }
+      }
+
+      const uploadPayload = await this.s3Storage.uploadFromUrl(mediaLink, {
+        path: 'tickets',
+        fileName: messageId,
+      })
+
+      if (!uploadPayload) {
+        return { retry: true, error: 'ERROR_UPLOAD_MEDIA' }
+      }
+
+      const ticketPayload: TicketPayload = {
+        ...this.whatsAppPayloadService.getBasicInfo(payload),
+        fileName: uploadPayload.storageFileName,
+        messageId,
+      }
+
+      return await this.readTicket(ticketPayload, { alreadyPersisted: false })
+    } catch (error: any) {
+      return { retry: false, error: 'ERROR_PARSE_PAYLOAD', details: error.message }
+    }
+  }
+
+  /**
    * Primeira execução: busca payload no S3, valida se é imagem,
    * faz upload e encaminha para leitura do QR Code.
    */
@@ -200,6 +246,8 @@ export default class WebhookTicketService {
       messageId: payload.whatsappMessageId,
     })
 
+    this.triggerValidationWebhook(qrCode.ticket_id, payload.fileName)
+
     return { retry: false, success: true, ...validate }
   }
 
@@ -255,5 +303,28 @@ export default class WebhookTicketService {
     }
 
     return result
+  }
+
+  /**
+   * Dispara webhook para notificar validação do ticket sem bloquear a execução
+   */
+  private triggerValidationWebhook(ticketId: string, fileName: string): void {
+    const ticketNumber = ticketId.slice(2)
+    const now = new Date()
+    const validatedOn = now.toISOString().slice(0, 19).replace('T', ' ')
+
+    const body = {
+      ticket_number: ticketNumber,
+      ticker_mirror: fileName,
+      validated_on: validatedOn,
+    }
+
+    fetch('https://newapi.showdepremios.cloud/api/v1/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).catch((error) => {
+      console.error('[WebhookTicketService] Erro ao disparar webhook de validação:', error.message)
+    })
   }
 }

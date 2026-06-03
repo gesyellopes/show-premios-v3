@@ -4,6 +4,8 @@ node_modules/
 # Compilação e Build
 build/
 dist/
+/webhook-files
+/webhook-files-2
 
 # Storage
 /storage
