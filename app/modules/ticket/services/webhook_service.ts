@@ -85,7 +85,7 @@ export default class WebhookTicketService {
 
     const rawPayload = JSON.parse(content)
 
-    if (!rawPayload.data.message.imageMessage) {
+    if (!rawPayload?.data?.message?.imageMessage) {
       return { retry: false, error: 'IS_NOT_IMAGE' }
     }
 
@@ -259,7 +259,7 @@ export default class WebhookTicketService {
     const messageId = data.key.id
     const senderName = data.pushName
     const sentAt = data.messageTimestamp
-    let mediaUrl = data.message.mediaUrl
+    let mediaUrl = data.message?.mediaUrl
 
     // Remove query params da URL para evitar problemas com assinatura expirada
     if (mediaUrl) {
