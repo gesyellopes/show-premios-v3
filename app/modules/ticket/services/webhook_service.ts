@@ -5,7 +5,6 @@ import WhatsAppPayloadService from './whatsapp_payload_service.ts'
 import TicketWhatsappService from './ticket_whatsapp_messages_service.ts'
 import S3Storage from '../../../modules/storage/services/s3_service.ts'
 import TicketReadService from './ticket_read_service.ts'
-import EvolutionApiService from './evolution_api_service.ts'
 import { TICKET_CODES } from '../constants/index.ts'
 import i18n from '@adonisjs/i18n/services/main'
 
@@ -36,8 +35,7 @@ export default class WebhookTicketService {
     protected whatsAppPayloadService: WhatsAppPayloadService,
     protected ticketWhatsappService: TicketWhatsappService,
     protected s3Storage: S3Storage,
-    protected ticketReadService: TicketReadService,
-    protected evolutionApiService: EvolutionApiService
+    protected ticketReadService: TicketReadService
   ) {}
 
   /**
@@ -180,17 +178,6 @@ export default class WebhookTicketService {
     const ticketCode = ticketId.slice(2)
 
     await this.ticketWhatsappService.updateStatus(payload.messageId, 'VALIDATED', ticketId)
-    await this.evolutionApiService.sendText({
-      number: payload.senderNumber!,
-      text: this.i18n.t('ticket.ticket_already_validated', { ticketCode }),
-      quoted: {
-        key: {
-          id: payload.messageId,
-          remoteJid: `${payload.senderNumber}@s.whatsapp.net`,
-          fromMe: false,
-        },
-      },
-    })
 
     return { retry: false, error: TICKET_CODES.ALREADY_VALIDATED }
   }
@@ -204,18 +191,6 @@ export default class WebhookTicketService {
     const validate = await this.ticketWhatsappService.approveValidation({
       messageId: payload.messageId,
       ticketNumber: qrCode.ticket_id,
-    })
-
-    await this.evolutionApiService.sendText({
-      number: payload.senderNumber!,
-      text: this.i18n.t('ticket.ticket_success', { ticketCode }),
-      quoted: {
-        key: {
-          id: payload.messageId,
-          remoteJid: `${payload.senderNumber}@s.whatsapp.net`,
-          fromMe: false,
-        },
-      },
     })
 
     this.triggerValidationWebhook(qrCode.ticket_id, payload.fileName)
@@ -236,19 +211,6 @@ export default class WebhookTicketService {
     if (attempts < env.get('MAX_ATTEMPTS')) {
       return { retry: true, error: TICKET_CODES.ERROR_FILE_DELETED }
     }
-
-    const messageKey = this.resolveFailureMessageKey(reason)
-    await this.evolutionApiService.sendText({
-      number: payload.senderNumber!,
-      text: this.i18n.t(messageKey),
-      quoted: {
-        key: {
-          id: payload.messageId,
-          remoteJid: `${payload.senderNumber}@s.whatsapp.net`,
-          fromMe: false,
-        },
-      },
-    })
 
     return { retry: false, error: TICKET_CODES.MAX_ATTEMPTS, reason }
   }
