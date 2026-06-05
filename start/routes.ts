@@ -10,6 +10,14 @@
 
 //import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
+import '#modules/dealer/routes.js'
+
+import '#modules/user/routes.js'
+
+import '#modules/agent/routes.js'
+
+import '#modules/event/routes.js'
+
 import '#modules/person/routes.js'
 
 
@@ -39,11 +47,13 @@ router.post('/persons', [PersonsController, 'store'])
 router.put('/persons/:id', [PersonsController, 'update'])
 router.delete('/persons/:id', [PersonsController, 'destroy'])
 
+/*
 router.get('/users', [UsersController, 'index'])
 router.get('/users/:id', [UsersController, 'show'])
 router.post('/users', [UsersController, 'store'])
 router.put('/users/:id', [UsersController, 'update'])
 router.delete('/users/:id', [UsersController, 'destroy'])
+*/
 
 router.get('/', () => {
   return { hello: 'world' }

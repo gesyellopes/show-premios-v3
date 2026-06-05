@@ -8,6 +8,9 @@ import TicketReadService from './ticket_read_service.ts'
 import { TICKET_CODES } from '../constants/index.ts'
 import { wapi } from '#start/w-api'
 import i18n from '@adonisjs/i18n/services/main'
+import TicketsPirapora from '../models/tickets_pirapora.ts'
+import TicketsBuritizeiro from '../models/tickets_buritizeiro.ts'
+import db from '@adonisjs/lucid/services/db'
 
 interface TicketPayload {
   whatsappMessageId?: string
@@ -246,7 +249,10 @@ export default class WebhookTicketService {
       messageId: payload.whatsappMessageId,
     })
 
-    this.triggerValidationWebhook(qrCode.ticket_id, payload.fileName)
+    // Salvar espelho nas tabelas auxiliares
+    await this.saveMirrorToAuxiliaryTable(qrCode.ticket_id, payload.messageId)
+
+    // this.triggerValidationWebhook(qrCode.ticket_id, payload.fileName)
 
     return { retry: false, success: true, ...validate }
   }
@@ -306,25 +312,64 @@ export default class WebhookTicketService {
   }
 
   /**
+   * Salva espelho do ticket nas tabelas auxiliares baseado no prefixo
+   */
+  private async saveMirrorToAuxiliaryTable(ticketId: string, messageId: string): Promise<void> {
+    try {
+      const prefix = ticketId.slice(0, 2)
+      const ticketNumber = ticketId.slice(2)
+      const ticketMirror = `${messageId}.jpeg`
+      const now = new Date().toISOString().slice(0, 19).replace('T', ' ')
+
+      if (prefix === 'AB') {
+        await db
+          .from('tickets_pirapora')
+          .where('ticket_number', ticketNumber)
+          .update({
+            validated: 1,
+            validated_on: now,
+            ticket_mirror: ticketMirror,
+            updated_at: db.raw('now()'),
+          })
+      } else if (prefix === 'AC') {
+        await db
+          .from('tickets_buritizeiro')
+          .where('ticket_number', ticketNumber)
+          .update({
+            validated: 1,
+            validated_on: now,
+            ticket_mirror: ticketMirror,
+            updated_at: db.raw('now()'),
+          })
+      }
+    } catch (error: any) {
+      console.error(
+        '[WebhookTicketService] Erro ao salvar espelho nas tabelas auxiliares:',
+        error.message
+      )
+    }
+  }
+
+  /**
    * Dispara webhook para notificar validação do ticket sem bloquear a execução
    */
-  private triggerValidationWebhook(ticketId: string, fileName: string): void {
-    const ticketNumber = ticketId.slice(2)
-    const now = new Date()
-    const validatedOn = now.toISOString().slice(0, 19).replace('T', ' ')
+  // private triggerValidationWebhook(ticketId: string, fileName: string): void {
+  //   const ticketNumber = ticketId.slice(2)
+  //   const now = new Date()
+  //   const validatedOn = now.toISOString().slice(0, 19).replace('T', ' ')
 
-    const body = {
-      ticket_number: ticketNumber,
-      ticker_mirror: fileName,
-      validated_on: validatedOn,
-    }
+  //   const body = {
+  //     ticket_number: ticketNumber,
+  //     ticker_mirror: fileName,
+  //     validated_on: validatedOn,
+  //   }
 
-    fetch('https://newapi.showdepremios.cloud/api/v1/validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    }).catch((error) => {
-      console.error('[WebhookTicketService] Erro ao disparar webhook de validação:', error.message)
-    })
-  }
+  //   fetch('https://newapi.showdepremios.cloud/api/v1/validate', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify(body),
+  //   }).catch((error) => {
+  //     console.error('[WebhookTicketService] Erro ao disparar webhook de validação:', error.message)
+  //   })
+  // }
 }

@@ -1,0 +1,143 @@
+{
+  "info": {
+    "_postman_id": "dealer-crud-collection",
+    "name": "Dealer CRUD API",
+    "description": "Coleção de requisições para gerenciar Dealers",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Dealers",
+      "item": [
+        {
+          "name": "Listar todos os Dealers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dealer/dealers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dealer",
+                "dealers"
+              ]
+            },
+            "description": "Retorna uma lista de todos os dealers com informações do responsável"
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Dealer por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dealer/dealers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dealer",
+                "dealers",
+                "1"
+              ]
+            },
+            "description": "Retorna um dealer específico pelo ID ou UUID"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar novo Dealer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": 1,\n  \"name\": \"Dealer XYZ\",\n  \"userId\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/dealer/dealers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dealer",
+                "dealers"
+              ]
+            },
+            "description": "Cria um novo dealer. O UUID é gerado automaticamente."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Dealer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dealer XYZ Atualizado\",\n  \"userId\": 6\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/dealer/dealers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dealer",
+                "dealers",
+                "1"
+              ]
+            },
+            "description": "Atualiza um dealer existente. Todos os campos são opcionais."
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Dealer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dealer/dealers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dealer",
+                "dealers",
+                "1"
+              ]
+            },
+            "description": "Deleta um dealer existente"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3333",
+      "type": "string"
+    }
+  ]
+}

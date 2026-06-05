@@ -1,0 +1,187 @@
+{
+  "info": {
+    "_postman_id": "agent-crud-collection",
+    "name": "Agent CRUD",
+    "description": "API para gerenciamento de Agents",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Listar Todos os Agents",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/agent/agents",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "agent",
+            "agents"
+          ]
+        },
+        "description": "Retorna uma lista de todos os agents cadastrados com informações do usuário responsável e evento associado"
+      },
+      "response": []
+    },
+    {
+      "name": "Visualizar Agent por ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/agent/agents/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "agent",
+            "agents",
+            "1"
+          ]
+        },
+        "description": "Retorna as informações de um agent específico (use ID ou UUID)"
+      },
+      "response": []
+    },
+    {
+      "name": "Visualizar Agent por UUID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/agent/agents/550e8400-e29b-41d4-a716-446655440000",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "agent",
+            "agents",
+            "550e8400-e29b-41d4-a716-446655440000"
+          ]
+        },
+        "description": "Retorna as informações de um agent específico usando UUID"
+      },
+      "response": []
+    },
+    {
+      "name": "Criar Novo Agent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventId\": 1,\n  \"name\": \"Agent de Vendas\",\n  \"userId\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/agent/agents",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "agent",
+            "agents"
+          ]
+        },
+        "description": "Cria um novo agent. UUID é gerado automaticamente."
+      },
+      "response": []
+    },
+    {
+      "name": "Atualizar Agent",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventId\": 2,\n  \"name\": \"Agent de Vendas Premium\",\n  \"userId\": 2\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/agent/agents/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "agent",
+            "agents",
+            "1"
+          ]
+        },
+        "description": "Atualiza um agent existente (use ID ou UUID)"
+      },
+      "response": []
+    },
+    {
+      "name": "Deletar Agent",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/agent/agents/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "agent",
+            "agents",
+            "1"
+          ]
+        },
+        "description": "Deleta um agent do sistema (use ID ou UUID)"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3333",
+      "type": "default"
+    }
+  ]
+}
