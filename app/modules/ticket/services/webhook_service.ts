@@ -321,6 +321,7 @@ export default class WebhookTicketService {
       const ticketMirror = `${messageId}.jpeg`
       const now = new Date().toISOString().slice(0, 19).replace('T', ' ')
 
+      /*
       if (prefix === 'AB') {
         await db
           .from('tickets_pirapora')
@@ -342,6 +343,18 @@ export default class WebhookTicketService {
             updated_at: db.raw('now()'),
           })
       }
+        */
+
+      await db
+          .from('tickets_rodeio')
+          .where('ticket_number', ticketNumber)
+          .update({
+            validated: 1,
+            validated_on: now,
+            ticket_mirror: ticketMirror,
+            updated_at: db.raw('now()'),
+          })
+      
     } catch (error: any) {
       console.error(
         '[WebhookTicketService] Erro ao salvar espelho nas tabelas auxiliares:',
