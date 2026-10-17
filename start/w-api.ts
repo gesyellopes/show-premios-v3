@@ -1,6 +1,6 @@
 // Exemplo em: start/wapi.ts ou services/wapi_service.ts
 import env from '#start/env' // ou onde você guarda suas envs
-import { WApi } from '#integrations/w-api/w_api.ts'
+import { WApi } from '#integrations/w-api/w_api.js'
 
 export const wapi = new WApi({
   token: env.get('WAPI_TOKEN'),
