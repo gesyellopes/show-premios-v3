@@ -346,7 +346,7 @@ export default class WebhookTicketService {
         */
 
       await db
-          .from('tickets_rodeio')
+          .from('tickets_pirapora2')
           .where('ticket_number', ticketNumber)
           .update({
             validated: 1,
