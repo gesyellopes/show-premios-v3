@@ -67,7 +67,7 @@ export default class WebhookWorker extends BaseCommand {
       //this.logger.success(`✅ Finalizado: ${messageId}`)
       return false
     } catch (error) {
-      //const msg = error instanceof Error ? error.message : 'Erro desconhecido'
+      const msg = error instanceof Error ? error.message : 'Erro desconhecido'
       this.logger.error(`❌ Erro no ao processar: ${msg}`)
       return true // Erros de exceção sempre tentam novamente
     }

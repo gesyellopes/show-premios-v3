@@ -8,8 +8,6 @@ import TicketReadService from './ticket_read_service.ts'
 import { TICKET_CODES } from '../constants/index.ts'
 import { wapi } from '#start/w-api'
 import i18n from '@adonisjs/i18n/services/main'
-import TicketsPirapora from '../models/tickets_pirapora.ts'
-import TicketsBuritizeiro from '../models/tickets_buritizeiro.ts'
 import db from '@adonisjs/lucid/services/db'
 
 interface TicketPayload {
@@ -316,7 +314,6 @@ export default class WebhookTicketService {
    */
   private async saveMirrorToAuxiliaryTable(ticketId: string, messageId: string): Promise<void> {
     try {
-      const prefix = ticketId.slice(0, 2)
       const ticketNumber = ticketId.slice(2)
       const ticketMirror = `${messageId}.jpeg`
       const now = new Date().toISOString().slice(0, 19).replace('T', ' ')
