@@ -1,0 +1,7 @@
+node_modules
+build
+.adonisjs
+.git
+.env
+*.log
+tmp
