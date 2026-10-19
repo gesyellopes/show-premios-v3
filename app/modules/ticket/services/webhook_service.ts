@@ -343,15 +343,14 @@ export default class WebhookTicketService {
         */
 
       await db
-          .from('tickets_pirapora2')
-          .where('ticket_number', ticketNumber)
-          .update({
-            validated: 1,
-            validated_on: now,
-            ticket_mirror: ticketMirror,
-            updated_at: db.raw('now()'),
-          })
-      
+        .from('tickets_vzp')
+        .where('ticket_number', ticketNumber)
+        .update({
+          validated: 1,
+          validated_on: now,
+          ticket_mirror: ticketMirror,
+          updated_at: db.raw('now()'),
+        })
     } catch (error: any) {
       console.error(
         '[WebhookTicketService] Erro ao salvar espelho nas tabelas auxiliares:',
