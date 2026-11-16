@@ -160,6 +160,35 @@ export default class WebhookTicketService {
   }
 
   /**
+   * Chamado pelo worker quando a mensagem esgota as tentativas.
+   * Lê o payload salvo no S3 para obter o remetente e avisa para reenviar a foto.
+   * Nunca lança exceção: uma falha aqui não pode derrubar o worker.
+   */
+  async notifyFinalFailure(messageId: string): Promise<boolean> {
+    try {
+      const content = await this.s3Storage.getContent(
+        `webhooks/whatsapp-messages/${messageId}.json`,
+        true
+      )
+      if (!content) return false
+
+      const payload = JSON.parse(content)
+      const phone = payload?.sender?.id
+      if (!phone) return false
+
+      await wapi.sendText({
+        phone,
+        message: this.i18n.t('ticket.ticket_download_failed'),
+        messageId: payload.messageId,
+      })
+      return true
+    } catch (error: any) {
+      console.error(`[WebhookTicketService] Falha ao notificar ${messageId}:`, error.message)
+      return false
+    }
+  }
+
+  /**
    * Persiste a mensagem (se necessário), lê o QR Code e valida o ticket.
    */
   private async readTicket(
@@ -290,7 +319,7 @@ export default class WebhookTicketService {
       MULTIPLE_QRCODES: 'ticket.ticket_multiple_qrcodes',
       INVALID_QRCODE: 'ticket.ticket_empty_qrcode',
     }
-    return map[reason] ?? 'ticket.max_attempts_error'
+    return map[reason] ?? 'ticket.ticket_max_attempts_error'
   }
 
   /**

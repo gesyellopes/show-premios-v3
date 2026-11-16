@@ -17,6 +17,13 @@ export default class WebhookWorker extends BaseCommand {
 
   private running = true
 
+  /** Número máximo de execuções por mensagem antes de movê-la para a lista de falhas */
+  private static readonly MAX_WORKER_ATTEMPTS = 5
+  /** Hash messageId -> nº de tentativas */
+  private static readonly ATTEMPTS_KEY = 'webhook_attempts'
+  /** Lista de mensagens descartadas após esgotar as tentativas (para análise manual) */
+  private static readonly FAILED_KEY = 'webhook_failed'
+
   async run() {
     this.logger.info('🚀 Worker iniciado. Aguardando mensagens...')
 
@@ -29,15 +36,31 @@ export default class WebhookWorker extends BaseCommand {
         // result no Adonis Redis retorna [key, value]
         const [, messageId] = result
 
+        const attempts = await redis.hincrby(WebhookWorker.ATTEMPTS_KEY, messageId, 1)
         const shouldRetry = await this.processMessage(messageId)
 
-        if (shouldRetry) {
-          this.logger.info(`🔄 Agendando reprocessamento para: ${messageId}`)
-          // Devolvemos ao final da fila para processar outros antes de tentar este novamente
-          await redis.rpush('webhook_queue', messageId)
-          // Pequeno delay para não travar em erro persistente
-          await new Promise((resolve) => setTimeout(resolve, 2000))
+        if (!shouldRetry) {
+          await redis.hdel(WebhookWorker.ATTEMPTS_KEY, messageId)
+          continue
         }
+
+        if (attempts >= WebhookWorker.MAX_WORKER_ATTEMPTS) {
+          this.logger.error(
+            `🛑 Descartando ${messageId} após ${attempts} tentativas. Movido para ${WebhookWorker.FAILED_KEY}`
+          )
+          await redis.hdel(WebhookWorker.ATTEMPTS_KEY, messageId)
+          await redis.rpush(WebhookWorker.FAILED_KEY, messageId)
+          const service = await app.container.make(WebhookTicketService)
+          const notified = await service.notifyFinalFailure(messageId)
+          this.logger.info(`📨 Remetente ${notified ? 'notificado' : 'não notificado'}: ${messageId}`)
+          continue
+        }
+
+        this.logger.info(`🔄 Agendando reprocessamento para: ${messageId} (tentativa ${attempts})`)
+        // Devolvemos ao final da fila para processar outros antes de tentar este novamente
+        await redis.rpush('webhook_queue', messageId)
+        // Pequeno delay para não travar em erro persistente
+        await new Promise((resolve) => setTimeout(resolve, 2000))
       } catch (error) {
         const msg = error instanceof Error ? error.message : 'Erro desconhecido'
         this.logger.error(`❌ Erro no loop: ${msg}`)

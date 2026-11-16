@@ -5,5 +5,6 @@
   "ticket_multiple_qrcodes": "🛑 Detectamos mais de um QR Code na imagem. Por favor, envie uma foto de apenas um canhoto por vez. 🛑",
   "ticket_empty_qrcode": "⛔️ O QR Code lido parece estar vazio ou inválido. Por favor, verifique o canhoto e tente novamente. ⛔️",
   "ticket_already_validated": "⚠️ O canhoto número  *{ticketCode}* já foi validado anteriormente. ⚠️",
-  "ticket_file_delete_error": "Erro ao remover o arquivo do ticket."
+  "ticket_file_delete_error": "Erro ao remover o arquivo do ticket.",
+  "ticket_download_failed": "⚠️ Não conseguimos baixar a imagem que você enviou. Por favor, envie a foto do canhoto novamente. ⚠️"
 }
